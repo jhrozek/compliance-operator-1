@@ -69,7 +69,7 @@ gendeepcopy: operator-sdk
 	@GO111MODULE=on operator-sdk generate k8s
 
 test-unit: fmt
-	@$(GO) test $(TEST_OPTIONS) $(PKGS)
+	@GOPROXY=https://proxy.golang.org $(GO) test $(TEST_OPTIONS) $(PKGS)
 
 push: build
 	$(RUNTIME) tag $(IMAGE_PATH) $(IMAGE_PATH):$(TAG)
