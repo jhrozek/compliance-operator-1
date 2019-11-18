@@ -1,0 +1,6 @@
+apiVersion: complianceoperator.compliance.openshift.io/v1alpha1
+kind: ComplianceRemediation
+metadata:
+  name: 99-master-ssh
+spec:
+  annotation: remediate-me-bitch

@@ -1,0 +1,7 @@
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  name: example-machineconfig
+spec:
+  # Add fields here
+  size: 3

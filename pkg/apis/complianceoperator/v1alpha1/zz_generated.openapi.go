@@ -11,9 +11,87 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/openshift/compliance-operator/pkg/apis/complianceoperator/v1alpha1.ComplianceScan":       schema_pkg_apis_complianceoperator_v1alpha1_ComplianceScan(ref),
-		"github.com/openshift/compliance-operator/pkg/apis/complianceoperator/v1alpha1.ComplianceScanSpec":   schema_pkg_apis_complianceoperator_v1alpha1_ComplianceScanSpec(ref),
-		"github.com/openshift/compliance-operator/pkg/apis/complianceoperator/v1alpha1.ComplianceScanStatus": schema_pkg_apis_complianceoperator_v1alpha1_ComplianceScanStatus(ref),
+		"./pkg/apis/complianceoperator/v1alpha1.ComplianceRemediation":       schema_pkg_apis_complianceoperator_v1alpha1_ComplianceRemediation(ref),
+		"./pkg/apis/complianceoperator/v1alpha1.ComplianceRemediationSpec":   schema_pkg_apis_complianceoperator_v1alpha1_ComplianceRemediationSpec(ref),
+		"./pkg/apis/complianceoperator/v1alpha1.ComplianceRemediationStatus": schema_pkg_apis_complianceoperator_v1alpha1_ComplianceRemediationStatus(ref),
+		"./pkg/apis/complianceoperator/v1alpha1.ComplianceScan":              schema_pkg_apis_complianceoperator_v1alpha1_ComplianceScan(ref),
+		"./pkg/apis/complianceoperator/v1alpha1.ComplianceScanSpec":          schema_pkg_apis_complianceoperator_v1alpha1_ComplianceScanSpec(ref),
+		"./pkg/apis/complianceoperator/v1alpha1.ComplianceScanStatus":        schema_pkg_apis_complianceoperator_v1alpha1_ComplianceScanStatus(ref),
+	}
+}
+
+func schema_pkg_apis_complianceoperator_v1alpha1_ComplianceRemediation(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ComplianceRemediation is the Schema for the complianceremediations API",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("./pkg/apis/complianceoperator/v1alpha1.ComplianceRemediationSpec"),
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("./pkg/apis/complianceoperator/v1alpha1.ComplianceRemediationStatus"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"./pkg/apis/complianceoperator/v1alpha1.ComplianceRemediationSpec", "./pkg/apis/complianceoperator/v1alpha1.ComplianceRemediationStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_pkg_apis_complianceoperator_v1alpha1_ComplianceRemediationSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ComplianceRemediationSpec defines the desired state of ComplianceRemediation",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"annotation": {
+						SchemaProps: spec.SchemaProps{
+							Description: "INSERT ADDITIONAL SPEC FIELDS - desired state of cluster Important: Run \"operator-sdk generate k8s\" to regenerate code after modifying this file Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_complianceoperator_v1alpha1_ComplianceRemediationStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ComplianceRemediationStatus defines the observed state of ComplianceRemediation",
+				Type:        []string{"object"},
+			},
+		},
 	}
 }
 
@@ -45,19 +123,19 @@ func schema_pkg_apis_complianceoperator_v1alpha1_ComplianceScan(ref common.Refer
 					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/openshift/compliance-operator/pkg/apis/complianceoperator/v1alpha1.ComplianceScanSpec"),
+							Ref: ref("./pkg/apis/complianceoperator/v1alpha1.ComplianceScanSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/openshift/compliance-operator/pkg/apis/complianceoperator/v1alpha1.ComplianceScanStatus"),
+							Ref: ref("./pkg/apis/complianceoperator/v1alpha1.ComplianceScanStatus"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/openshift/compliance-operator/pkg/apis/complianceoperator/v1alpha1.ComplianceScanSpec", "github.com/openshift/compliance-operator/pkg/apis/complianceoperator/v1alpha1.ComplianceScanStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"./pkg/apis/complianceoperator/v1alpha1.ComplianceScanSpec", "./pkg/apis/complianceoperator/v1alpha1.ComplianceScanStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
