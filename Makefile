@@ -66,7 +66,7 @@ help: ## Show this help screen
 
 .PHONY: image
 image: fmt operator-sdk ## Build the compliance-operator container image
-	$(GOPATH)/bin/operator-sdk build $(IMAGE_PATH) --image-builder $(RUNTIME)
+	$(GOPATH)/bin/operator-sdk build $(IMAGE_PATH):$(TAG) --image-builder $(RUNTIME)
 
 .PHONY: build
 build: ## Build the compliance-operator binary
@@ -143,7 +143,7 @@ else
 e2e: namespace operator-sdk check-if-ci
 endif
 	@echo "Running e2e tests"
-	$(GOPATH)/bin/operator-sdk test local ./tests/e2e --image "$(IMAGE_PATH)" --namespace "$(NAMESPACE)" --go-test-flags "$(E2E_GO_TEST_FLAGS)"
+	$(GOPATH)/bin/operator-sdk test local ./tests/e2e --image "$(IMAGE_PATH):$(TAG)" --namespace "$(NAMESPACE)" --go-test-flags "$(E2E_GO_TEST_FLAGS)"
 
 # This checks if we're in a CI environment by checking the IMAGE_FORMAT
 # environmnet variable. if we are, lets ues the image from CI and use this
