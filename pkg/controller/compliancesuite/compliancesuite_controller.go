@@ -16,6 +16,7 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -222,18 +223,48 @@ func (r *ReconcileComplianceSuite) updateScanStatus(suite *complianceoperatorv1a
 		}
 	}
 
-	modScanStatus := complianceoperatorv1alpha1.ComplianceScanStatusWrapper{
-		ComplianceScanStatus: complianceoperatorv1alpha1.ComplianceScanStatus{
-			Phase: scan.Status.Phase,
-		},
-		Name: scan.Name,
+	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		// Fetch the resource again. Since we're likely to get conflicts, we need to make
+		// sure we are updating the data in cluster or else we'll just loop
+		err := r.client.Get(context.TODO(), types.NamespacedName{Name:suite.Name, Namespace:suite.Namespace}, suite)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				// Request object not found, could have been deleted after reconcile request.
+				return nil
+			}
+			return  err
+		}
+
+		modScanStatus := complianceoperatorv1alpha1.ComplianceScanStatusWrapper{
+			ComplianceScanStatus: complianceoperatorv1alpha1.ComplianceScanStatus{
+				Phase: scan.Status.Phase,
+			},
+			Name: scan.Name,
+		}
+
+		suiteCopy := suite.DeepCopy()
+		suiteCopy.Status.ScanStatuses[idx] = modScanStatus
+		logger.Info("Updating scan status", "scan", modScanStatus.Name, "phase", modScanStatus.Phase)
+
+		logger.Error(err, "XXX: BEFORE UPDATE")
+		err = r.client.Status().Update(context.TODO(), suiteCopy)
+		logger.Error(err, "XXX: AFTER UPDATE", "err", err)
+		if err != nil {
+			logger.Error(err, "XXX: GOT UPDATE CONFLICT")
+			return nil
+		}
+		logger.Error(err, "XXX: UPDATED")
+		return nil
+	})
+
+	if err != nil {
+		logger.Error(err, "Error updating the scan status array")
+		// May be conflict if max retries were hit, or may be something unrelated
+		// like permissions or a network error
+		return err
 	}
 
-	suiteCopy := suite.DeepCopy()
-	suiteCopy.Status.ScanStatuses[idx] = modScanStatus
-	logger.Info("Updating scan status", "scan", modScanStatus.Name, "phase", modScanStatus.Phase)
-
-	return r.client.Status().Update(context.TODO(), suiteCopy)
+	return nil
 }
 
 func (r *ReconcileComplianceSuite) reconcileScanRemediations(suite *complianceoperatorv1alpha1.ComplianceSuite, scan *complianceoperatorv1alpha1.ComplianceScan, logger logr.Logger) error {
@@ -385,18 +416,47 @@ func readCompressedData(compressed string) (string, error) {
 }
 
 func (r *ReconcileComplianceSuite) addScanStatus(suite *complianceoperatorv1alpha1.ComplianceSuite, scan *complianceoperatorv1alpha1.ComplianceScan, logger logr.Logger) error {
-	// if not, create the scan status with the name and the current state
-	newScanStatus := complianceoperatorv1alpha1.ComplianceScanStatusWrapper{
-		ComplianceScanStatus: complianceoperatorv1alpha1.ComplianceScanStatus{
-			Phase: scan.Status.Phase,
-		},
-		Name: scan.Name,
+	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		// Fetch the resource again. Since we're likely to get conflicts, we need to make
+		// sure we are updating the data in cluster or else we'll just loop
+		err := r.client.Get(context.TODO(), types.NamespacedName{Name:suite.Name, Namespace:suite.Namespace}, suite)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				// Request object not found, could have been deleted after reconcile request.
+				return nil
+			}
+			return  err
+		}
+
+		newScanStatus := complianceoperatorv1alpha1.ComplianceScanStatusWrapper{
+			ComplianceScanStatus: complianceoperatorv1alpha1.ComplianceScanStatus{
+				Phase: scan.Status.Phase,
+			},
+			Name: scan.Name,
+		}
+
+		suiteCopy := suite.DeepCopy()
+		suiteCopy.Status.ScanStatuses = append(suite.Status.ScanStatuses, newScanStatus)
+		logger.Info("Adding scan status", "scan", newScanStatus.Name, "phase", newScanStatus.Phase)
+		logger.Error(err, "XXX: BEFORE ADD")
+		err = r.client.Status().Update(context.TODO(), suiteCopy)
+		logger.Error(err, "XXX: AFTER ADD", "err", err)
+		if err != nil {
+			logger.Error(err, "XXX: GOT ADD CONFLICT")
+			return nil
+		}
+		logger.Error(err, "XXX: ADDED")
+		return nil
+	})
+
+	if err != nil {
+		logger.Error(err, "Error adding to the scan status array")
+		// May be conflict if max retries were hit, or may be something unrelated
+		// like permissions or a network error
+		return err
 	}
 
-	suiteCopy := suite.DeepCopy()
-	suiteCopy.Status.ScanStatuses = append(suite.Status.ScanStatuses, newScanStatus)
-	logger.Info("Adding scan status", "scan", newScanStatus.Name, "phase", newScanStatus.Phase)
-	return r.client.Status().Update(context.TODO(), suiteCopy)
+	return nil
 }
 
 func launchScanForSuite(r *ReconcileComplianceSuite, suite *complianceoperatorv1alpha1.ComplianceSuite, scanWrap *complianceoperatorv1alpha1.ComplianceScanSpecWrapper, logger logr.Logger) error {

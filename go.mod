@@ -13,6 +13,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
 	github.com/onsi/ginkgo v1.10.3
 	github.com/onsi/gomega v1.7.1
+	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/operator-framework/operator-sdk v0.12.0
 	github.com/prometheus/client_golang v1.1.0 // indirect
 	github.com/prometheus/procfs v0.0.5 // indirect
@@ -23,6 +24,8 @@ require (
 	go.uber.org/zap v1.10.0
 	go4.org v0.0.0-20191010144846-132d2879e1e9 // indirect
 	golang.org/x/crypto v0.0.0-20190927123631-a832865fa7ad // indirect
+	google.golang.org/genproto v0.0.0-20181016170114-94acd270e44e // indirect
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	k8s.io/api v0.0.0
 	k8s.io/apimachinery v0.0.0
 	k8s.io/client-go v11.0.0+incompatible
