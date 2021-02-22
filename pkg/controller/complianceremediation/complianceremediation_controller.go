@@ -112,6 +112,23 @@ func (r *ReconcileComplianceRemediation) Reconcile(request reconcile.Request) (r
 		return common.ReturnWithRetriableError(reqLogger, common.WrapNonRetriableCtrlError(err))
 	}
 
+	// XXX: list all checks related to this remediation
+	var checkList compv1alpha1.ComplianceCheckResultList
+	dep, ok := remediationInstance.Annotations["dependency"]
+	if ok {
+		err = r.client.List(context.TODO(), &checkList, client.MatchingFields{"id": dep})
+		if err != nil {
+			log.Error(err, "XXXXXX: Could not list checks by ID", "id", dep, "rem.Name", remediationInstance.Name)
+		} else {
+			log.Info("XXXXXX: Could list by ID just fine", "id", dep, "rem.Name", remediationInstance.Name)
+			for _, check := range checkList.Items {
+				log.Info("XXXXX: Found a check", "check.Name", check.Name)
+			}
+		}
+	} else {
+		log.Info("XXXXXX: No dependencies to list")
+	}
+
 	// this would have been much nicer with go 1.13 using errors.Is()
 	// Only return if the error is retriable. Else, we persist it in the status
 	if err != nil && common.IsRetriable(err) {

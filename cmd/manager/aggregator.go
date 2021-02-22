@@ -429,7 +429,10 @@ func createResults(crClient *complianceCrClient, scan *compv1alpha1.ComplianceSc
 		}
 
 		// remediation is owned by the check
-		if err := createOrUpdateOneResult(crClient, pr.CheckResult, remLabels, nil, remExists, pr.Remediation); err != nil {
+		remAnnotations := make(map[string]string)
+		remAnnotations["dependency"] = pr.CheckResult.ID
+
+		if err := createOrUpdateOneResult(crClient, pr.CheckResult, remLabels, remAnnotations, remExists, pr.Remediation); err != nil {
 			return fmt.Errorf("cannot create or update remediation %s: %v", pr.Remediation.Name, err)
 		}
 
